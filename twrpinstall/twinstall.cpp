@@ -28,7 +28,6 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include <sys/mount.h>
 #include <unistd.h>
 
 #include <string.h>
@@ -54,7 +53,6 @@
 #include "twrp-functions.hpp"
 #include "gui/gui.hpp"
 #include "gui/pages.hpp"
-#include "legacy_property_service.h"
 #include "twinstall.h"
 #include "installcommand.h"
 extern "C" {
@@ -63,13 +61,6 @@ extern "C" {
 
 #define AB_OTA "payload_properties.txt"
 
-#ifndef TW_NO_LEGACY_PROPS
-static const char* properties_path = "/dev/__properties__";
-static const char* properties_path_renamed = "/dev/__properties_kk__";
-static bool legacy_props_env_initd = false;
-static bool legacy_props_path_modified = false;
-#endif
-
 enum zip_type {
 	UNKNOWN_ZIP_TYPE = 0,
 	UPDATE_BINARY_ZIP_TYPE,
@@ -77,56 +68,12 @@ enum zip_type {
 	TWRP_THEME_ZIP_TYPE
 };
 
-#ifndef TW_NO_LEGACY_PROPS
-// to support pre-KitKat update-binaries that expect properties in the legacy format
-static int switch_to_legacy_properties()
-{
-	if (!legacy_props_env_initd) {
-		if (legacy_properties_init() != 0)
-			return -1;
-
-		char tmp[32];
-		int propfd, propsz;
-		legacy_get_property_workspace(&propfd, &propsz);
-		sprintf(tmp, "%d,%d", dup(propfd), propsz);
-		setenv("ANDROID_PROPERTY_WORKSPACE", tmp, 1);
-		legacy_props_env_initd = true;
-	}
-
-	if (TWFunc::Path_Exists(properties_path)) {
-		// hide real properties so that the updater uses the envvar to find the legacy format properties
-		if (rename(properties_path, properties_path_renamed) != 0) {
-			LOGERR("Renaming %s failed: %s\n", properties_path, strerror(errno));
-			return -1;
-		} else {
-			legacy_props_path_modified = true;
-		}
-	}
-
-	return 0;
-}
-
-static int switch_to_new_properties()
-{
-	if (TWFunc::Path_Exists(properties_path_renamed)) {
-		if (rename(properties_path_renamed, properties_path) != 0) {
-			LOGERR("Renaming %s failed: %s\n", properties_path_renamed, strerror(errno));
-			return -1;
-		} else {
-			legacy_props_path_modified = false;
-		}
-	}
-
-	return 0;
-}
-#endif
-
 static int Install_Theme(const char* path, ZipArchiveHandle Zip) {
 #ifdef TW_OEM_BUILD // We don't do custom themes in OEM builds
 	CloseArchive(Zip);
 	return INSTALL_CORRUPT;
 #else
-	ZipString binary_name("ui.xml");
+	std::string binary_name("ui.xml");
 	ZipEntry binary_entry;
 	if (FindEntry(Zip, binary_name, &binary_entry) != 0) {
 		CloseArchive(Zip);
@@ -161,13 +108,13 @@ static int Prepare_Update_Binary(ZipArchiveHandle Zip) {
 	std::string base_name = UPDATE_BINARY_NAME;
 	base_name += "-";
 	ZipEntry binary_entry;
-	ZipString update_binary_string(UPDATE_BINARY_NAME);
+	std::string update_binary_string(UPDATE_BINARY_NAME);
 	if (FindEntry(Zip, update_binary_string, &binary_entry) != 0) {
 		for (arch = split.begin(); arch != split.end(); arch++) {
 			std::string temp = base_name + *arch;
-			ZipString binary_name(temp.c_str());
+			std::string binary_name(temp.c_str());
 			if (FindEntry(Zip, binary_name, &binary_entry) != 0) {
-				ZipString binary_name(temp.c_str());
+				std::string binary_name(temp.c_str());
 				break;
 			}
 		}
@@ -187,7 +134,7 @@ static int Prepare_Update_Binary(ZipArchiveHandle Zip) {
 	}
 
 	// If exists, extract file_contexts from the zip file
-	ZipString file_contexts("file_contexts");
+	std::string file_contexts("file_contexts");
 	ZipEntry file_contexts_entry;
 	if (FindEntry(Zip, file_contexts, &file_contexts_entry) != 0) {
 		LOGINFO("Zip does not contain SELinux file_contexts file in its root.\n");
@@ -208,56 +155,11 @@ static int Prepare_Update_Binary(ZipArchiveHandle Zip) {
 	return INSTALL_SUCCESS;
 }
 
-#ifndef TW_NO_LEGACY_PROPS
-static bool update_binary_has_legacy_properties(const char *binary) {
-	const char str_to_match[] = "ANDROID_PROPERTY_WORKSPACE";
-	int len_to_match = sizeof(str_to_match) - 1;
-	bool found = false;
-
-	int fd = open(binary, O_RDONLY);
-	if (fd < 0) {
-		LOGINFO("has_legacy_properties: Could not open %s: %s!\n", binary, strerror(errno));
-		return false;
-	}
-
-	struct stat finfo;
-	if (fstat(fd, &finfo) < 0) {
-		LOGINFO("has_legacy_properties: Could not fstat %d: %s!\n", fd, strerror(errno));
-		close(fd);
-		return false;
-	}
-
-	void *data = mmap(NULL, finfo.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-	if (data == MAP_FAILED) {
-		LOGINFO("has_legacy_properties: mmap (size=%zu) failed: %s!\n", (size_t)finfo.st_size, strerror(errno));
-	} else {
-		if (memmem(data, finfo.st_size, str_to_match, len_to_match)) {
-			LOGINFO("has_legacy_properties: Found legacy property match!\n");
-			found = true;
-		}
-		munmap(data, finfo.st_size);
-	}
-	close(fd);
-
-	return found;
-}
-#endif
 
 static int Run_Update_Binary(const char *path, int* wipe_cache, zip_type ztype) {
 	int ret_val, pipe_fd[2], status, zip_verify;
 	char buffer[1024];
 	FILE* child_data;
-
-#ifndef TW_NO_LEGACY_PROPS
-	if (!update_binary_has_legacy_properties(TMP_UPDATER_BINARY_PATH)) {
-		LOGINFO("Legacy property environment not used in updater.\n");
-	} else if (switch_to_legacy_properties() != 0) { /* Set legacy properties */
-		LOGERR("Legacy property environment did not initialize successfully. Properties may not be detected.\n");
-	} else {
-		LOGINFO("Legacy property environment initialized.\n");
-	}
-#endif
-
 	pipe(pipe_fd);
 
 	std::vector<std::string> args;
@@ -333,18 +235,6 @@ static int Run_Update_Binary(const char *path, int* wipe_cache, zip_type ztype) 
 	fclose(child_data);
 
 	int waitrc = TWFunc::Wait_For_Child(pid, &status, "Updater");
-
-#ifndef TW_NO_LEGACY_PROPS
-	/* Unset legacy properties */
-	if (legacy_props_path_modified) {
-		if (switch_to_new_properties() != 0) {
-			LOGERR("Legacy property environment did not disable successfully. Legacy properties may still be in use.\n");
-		} else {
-			LOGINFO("Legacy property environment disabled.\n");
-		}
-	}
-#endif
-
 	if (waitrc != 0)
 		return INSTALL_ERROR;
 
@@ -420,7 +310,7 @@ int TWinstall_zip(const char* path, int* wipe_cache) {
 	time_t start, stop;
 	time(&start);
 
-	ZipString update_binary_name(UPDATE_BINARY_NAME);
+	std::string update_binary_name(UPDATE_BINARY_NAME);
 	ZipEntry update_binary_entry;
 	if (FindEntry(Zip, update_binary_name, &update_binary_entry) == 0) {
 		LOGINFO("Update binary zip\n");
@@ -435,7 +325,7 @@ int TWinstall_zip(const char* path, int* wipe_cache) {
 				ret_val = Run_Update_Binary(path, wipe_cache, UPDATE_BINARY_ZIP_TYPE);
 		}
 	} else {
-		ZipString ab_binary_name(AB_OTA);
+		std::string ab_binary_name(AB_OTA);
 		ZipEntry ab_binary_entry;
 		if (FindEntry(Zip, ab_binary_name, &ab_binary_entry) == 0) {
 			LOGINFO("AB zip\n");
@@ -456,7 +346,7 @@ int TWinstall_zip(const char* path, int* wipe_cache) {
 				PartitionManager.UnMount_By_Path(PartitionManager.Get_Android_Root_Path(), true);
 			gui_warn("flash_ab_reboot=To flash additional zips, please reboot recovery to switch to the updated slot.");
 		} else {
-			ZipString binary_name("ui.xml");
+			std::string binary_name("ui.xml");
 			ZipEntry binary_entry;
 			if (FindEntry(Zip, binary_name, &binary_entry) != 0) {
 				LOGINFO("TWRP theme zip\n");

@@ -52,7 +52,7 @@ extern "C" {
 #include "../twcommon.h"
 #include "../variables.h"
 #include "cutils/properties.h"
-#include "install/adb_install.h"
+#include "twinstall/adb_install.h"
 };
 #include "set_metadata.h"
 #include "../minuitwrp/minui.h"

@@ -44,7 +44,7 @@
 #include "fuse_sideload.h"
 #include "twinstall/install.h"
 #include "twinstall/wipe_data.h"
-#include "minadbd_types.h"
+#include "minadbd/types.h"
 #include "otautil/sysutil.h"
 #include "recovery_ui/device.h"
 #include "recovery_ui/ui.h"
