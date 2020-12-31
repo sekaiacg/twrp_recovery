@@ -404,6 +404,8 @@ TWRP_REQUIRED_MODULES += \
     minadbd \
     twrpbu \
     adbd_system_api_recovery
+    me.twrp.twrpapp.apk \
+    privapp-permissions-twrpapp.xml
 
 ifneq ($(TW_INCLUDE_CRYPTO),)
 TWRP_REQUIRED_MODULES += \
