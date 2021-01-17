@@ -1,4 +1,4 @@
-package libminui_defaults
+package twrp
 
 import (
 	"android/soong/android"
@@ -30,6 +30,7 @@ func globalFlags(ctx android.BaseContext) []string {
 	}
 
 	matches, err = filepath.Glob("external/libdrm/Android.*")
+	_ = matches
 	if err == nil {
 		cflags = append(cflags, "-DHAS_DRM")
 	}
@@ -91,7 +92,7 @@ func globalFlags(ctx android.BaseContext) []string {
 		break
 	}
 
-	pixelFormat = strings.Replace(ctx.AConfig().Getenv("TARGET_RECOVERY_PIXEL_FORMAT"), "\"", "", -1)
+	pixelFormat = strings.Replace(ctx.AConfig().Getenv("TWRP_EVENT_LOGGING"), "\"", "", -1)
 	switch pixelFormat {
 	case "ABGR_8888":
 		cflags = append(cflags, "-DRECOVERY_ABGR")
@@ -159,7 +160,6 @@ func globalFlags(ctx android.BaseContext) []string {
 		cflags = append(cflags, "-DTW_HAPTICS_TSPDRV")
 	}
 
-	cflags = append(cflags, "-DTWRES="+ctx.AConfig().Getenv("TWRES_PATH"))
 	return cflags
 }
 
