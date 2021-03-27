@@ -1,6 +1,4 @@
 LOCAL_PATH := $(call my-dir)
-<<<<<<< HEAD
-=======
 include $(CLEAR_VARS)
 
 LOCAL_CFLAGS := -fno-strict-aliasing -Wno-implicit-fallthrough
@@ -140,7 +138,6 @@ endif
 LOCAL_CFLAGS += -DTWRES=\"$(TWRES_PATH)\"
 
 include $(BUILD_STATIC_LIBRARY)
->>>>>>> 8fde396e... bootable: Change how blank screen works
 
 # Transfer in the resources for the device
 include $(CLEAR_VARS)
