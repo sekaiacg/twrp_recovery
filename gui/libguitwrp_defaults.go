@@ -177,7 +177,7 @@ func globalFlags(ctx android.BaseContext) []string {
 		cflags = append(cflags, "DTW_USE_KEY_CODE_TOUCH_SYNC="+getMakeVars(ctx, "TW_USE_KEY_CODE_TOUCH_SYNC"))
 	}
 
-	if ctx.AConfig().Getenv("TW_SCREEN_BLANK_ON_BOOT") != "" {
+	if getMakeVars(ctx, "TW_SCREEN_BLANK_ON_BOOT") != "" {
 		cflags = append(cflags, "-DTW_SCREEN_BLANK_ON_BOOT")
 	}
 
