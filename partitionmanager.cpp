@@ -364,6 +364,7 @@ int TWPartitionManager::Process_Fstab(string Fstab_Filename, bool Display_Error)
 	Decrypt_Data();
 #endif
 
+	Update_System_Details();
 	if (Get_Super_Status())
 		Setup_Super_Partition();
 	UnMount_Main_Partitions();
