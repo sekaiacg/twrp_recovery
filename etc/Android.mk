@@ -67,7 +67,7 @@ LOCAL_MODULE_PATH := $(TARGET_RECOVERY_ROOT_OUT)/system/etc/init
 LOCAL_SRC_FILES := init/$(LOCAL_MODULE)
 include $(BUILD_PREBUILT)
 
-ifeq ($(filter $(AB_OTA_UPDATER) $(PRODUCT_USE_DYNAMIC_PARTITIONS), true), true)
+ifneq ($(filter $(AB_OTA_UPDATER) $(PRODUCT_USE_DYNAMIC_PARTITIONS) $(TW_INCLUDE_CRYPTO), true),)
 	include $(CLEAR_VARS)
 	LOCAL_MODULE := hwservicemanager.rc
 	LOCAL_MODULE_TAGS := optional
