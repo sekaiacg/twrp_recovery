@@ -456,5 +456,5 @@ int res_create_localized_alpha_surface(const char* name,
 }
 
 void res_free_surface(GRSurface* surface) {
-  free(surface);
+  delete(surface);
 }

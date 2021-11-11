@@ -421,15 +421,15 @@ static Device::BuiltinAction PromptAndWait(Device* device, InstallResult status)
       case Device::REBOOT:
       case Device::SHUTDOWN:
         if (!ui->IsTextVisible()) {
-          return Device::REBOOT;
+          return chosen_action;
         }
         // okay to reboot; no need to ask.
         if (!update_in_progress) {
-          return Device::REBOOT;
+          return chosen_action;
         }
         // An update might have been failed. Ask if user really wants to reboot.
         if (AskToReboot(device, chosen_action)) {
-          return Device::REBOOT;
+          return chosen_action;
         }
         break;
 
@@ -559,15 +559,15 @@ static void set_retry_bootloader_message(int retry_count, const std::vector<std:
   }
 }
 
-static bool bootreason_in_blacklist() {
+static bool bootreason_in_blocklist() {
   std::string bootreason = android::base::GetProperty("ro.boot.bootreason", "");
   if (!bootreason.empty()) {
     // More bootreasons can be found in "system/core/bootstat/bootstat.cpp".
-    static const std::vector<std::string> kBootreasonBlacklist{
+    static const std::vector<std::string> kBootreasonBlocklist{
       "kernel_panic",
       "Panic",
     };
-    for (const auto& str : kBootreasonBlacklist) {
+    for (const auto& str : kBootreasonBlocklist) {
       if (android::base::EqualsIgnoreCase(str, bootreason)) return true;
     }
   }
@@ -702,7 +702,7 @@ Device::BuiltinAction start_recovery(Device* device, const std::vector<std::stri
   }
 
   std::vector<std::string> title_lines =
-      android::base::Split(android::base::GetProperty("ro.bootimage.build.fingerprint", ""), ":");
+      android::base::Split(android::base::GetProperty("ro.build.fingerprint", ""), ":");
   title_lines.insert(std::begin(title_lines), "Android Recovery");
   ui->SetTitle(title_lines);
 
@@ -734,10 +734,10 @@ Device::BuiltinAction start_recovery(Device* device, const std::vector<std::stri
       // Log the error code to last_install when installation skips due to low battery.
       log_failure_code(kLowBattery, update_package);
       status = INSTALL_SKIPPED;
-    } else if (retry_count == 0 && bootreason_in_blacklist()) {
+    } else if (retry_count == 0 && bootreason_in_blocklist()) {
       // Skip update-on-reboot when bootreason is kernel_panic or similar
-      ui->Print("bootreason is in the blacklist; skip OTA installation\n");
-      log_failure_code(kBootreasonInBlacklist, update_package);
+      ui->Print("bootreason is in the blocklist; skip OTA installation\n");
+      log_failure_code(kBootreasonInBlocklist, update_package);
       status = INSTALL_SKIPPED;
     } else {
       // It's a fresh update. Initialize the retry_count in the BCB to 1; therefore we can later

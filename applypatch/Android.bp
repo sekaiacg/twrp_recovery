@@ -12,6 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+package {
+    default_applicable_licenses: ["bootable_recovery_applypatch_license"],
+}
+
+// Added automatically by a large-scale-change
+// See: http://go/android-license-faq
+license {
+    name: "bootable_recovery_applypatch_license",
+    visibility: [":__subpackages__"],
+    license_kinds: [
+        "SPDX-license-identifier-Apache-2.0",
+    ],
+    license_text: [
+        "NOTICE",
+    ],
+}
+
 cc_defaults {
     name: "applypatch_defaults",
 
@@ -54,7 +71,7 @@ cc_library_static {
         "libbz",
         "libedify",
         "libotautil",
-        "libz",
+        "libz_stable",
     ],
 
     shared_libs: [
@@ -120,7 +137,7 @@ cc_binary {
         "libbase",
         "libcrypto",
         "liblog",
-        "libz",
+        "libz_stable",
         "libziparchive",
     ],
 
@@ -129,9 +146,9 @@ cc_binary {
     ],
 }
 
-cc_library_host_static {
+cc_library_static {
     name: "libimgdiff",
-
+    host_supported: true,
     defaults: [
         "applypatch_defaults",
     ],
@@ -152,14 +169,13 @@ cc_library_host_static {
         "liblog",
         "libotautil",
         "libutils",
-        "libz",
+        "libz_stable",
         "libziparchive",
     ],
 }
 
 cc_binary_host {
     name: "imgdiff",
-
     srcs: [
         "imgdiff_main.cpp",
     ],
@@ -180,6 +196,6 @@ cc_binary_host {
         "liblog",
         "libbrotli",
         "libbz",
-        "libz",
+        "libz_stable",
     ],
 }

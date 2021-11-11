@@ -47,6 +47,7 @@
 #include <android-base/unique_fd.h>
 
 #include "install/package.h"
+#include "install/spl_check.h"
 #include "install/verifier.h"
 #include "install/wipe_data.h"
 #include "otautil/error_code.h"
@@ -67,14 +68,17 @@ static_assert(kRecoveryApiVersion == RECOVERY_API_VERSION, "Mismatching recovery
 // Default allocation of progress bar segments to operations
 // static constexpr int VERIFICATION_PROGRESS_TIME = 60;
 // static constexpr float VERIFICATION_PROGRESS_FRACTION = 0.25;
-
+// The charater used to separate dynamic fingerprints. e.x. sargo|aosp-sargo
+static const char* FINGERPRING_SEPARATOR = "|";
 static std::condition_variable finish_log_temperature;
+static bool isInStringList(const std::string& target_token, const std::string& str_list,
+                           const std::string& deliminator);
 
 bool ReadMetadataFromPackage(ZipArchiveHandle zip, std::map<std::string, std::string>* metadata) {
   CHECK(metadata != nullptr);
 
   static constexpr const char* METADATA_PATH = "META-INF/com/android/metadata";
-  ZipEntry entry;
+  ZipEntry64 entry;
   if (FindEntry(zip, METADATA_PATH, &entry) != 0) {
     LOG(ERROR) << "Failed to find " << METADATA_PATH;
     return false;
@@ -151,7 +155,8 @@ static bool CheckAbSpecificMetadata(const std::map<std::string, std::string>& me
 
   auto device_fingerprint = android::base::GetProperty("ro.build.fingerprint", "");
   auto pkg_pre_build_fingerprint = get_value(metadata, "pre-build");
-  if (!pkg_pre_build_fingerprint.empty() && pkg_pre_build_fingerprint != device_fingerprint) {
+  if (!pkg_pre_build_fingerprint.empty() &&
+      !isInStringList(device_fingerprint, pkg_pre_build_fingerprint, FINGERPRING_SEPARATOR)) {
     LOG(ERROR) << "Package is for source build " << pkg_pre_build_fingerprint << " but expected "
                << device_fingerprint;
     return false;
@@ -199,7 +204,8 @@ bool CheckPackageMetadata(const std::map<std::string, std::string>& metadata, Ot
 
   auto device = android::base::GetProperty("ro.product.device", "");
   auto pkg_device = get_value(metadata, "pre-device");
-  if (pkg_device != device || pkg_device.empty()) {
+  // device name can be a | separated list, so need to check
+  if (pkg_device.empty() || !isInStringList(device, pkg_device, FINGERPRING_SEPARATOR)) {
     LOG(ERROR) << "Package is for product " << pkg_device << " but expected " << device;
     return false;
   }
@@ -236,12 +242,18 @@ bool SetUpAbUpdateCommands(const std::string& package, ZipArchiveHandle zip, int
   // For A/B updates we extract the payload properties to a buffer and obtain the RAW payload offset
   // in the zip file.
   static constexpr const char* AB_OTA_PAYLOAD_PROPERTIES = "payload_properties.txt";
-  ZipEntry properties_entry;
+  ZipEntry64 properties_entry;
   if (FindEntry(zip, AB_OTA_PAYLOAD_PROPERTIES, &properties_entry) != 0) {
     LOG(ERROR) << "Failed to find " << AB_OTA_PAYLOAD_PROPERTIES;
     return false;
   }
-  uint32_t properties_entry_length = properties_entry.uncompressed_length;
+  auto properties_entry_length = properties_entry.uncompressed_length;
+  if (properties_entry_length > std::numeric_limits<size_t>::max()) {
+    LOG(ERROR) << "Failed to extract " << AB_OTA_PAYLOAD_PROPERTIES
+               << " because's uncompressed size exceeds size of address space. "
+               << properties_entry_length;
+    return false;
+  }
   std::vector<uint8_t> payload_properties(properties_entry_length);
   int32_t err =
       ExtractToMemory(zip, &properties_entry, payload_properties.data(), properties_entry_length);
@@ -251,7 +263,7 @@ bool SetUpAbUpdateCommands(const std::string& package, ZipArchiveHandle zip, int
   }
 
   static constexpr const char* AB_OTA_PAYLOAD = "payload.bin";
-  ZipEntry payload_entry;
+  ZipEntry64 payload_entry;
   if (FindEntry(zip, AB_OTA_PAYLOAD, &payload_entry) != 0) {
     LOG(ERROR) << "Failed to find " << AB_OTA_PAYLOAD;
     return false;
@@ -273,7 +285,7 @@ bool SetUpNonAbUpdateCommands(const std::string& package, ZipArchiveHandle zip, 
 
   // In non-A/B updates we extract the update binary from the package.
   static constexpr const char* UPDATE_BINARY_NAME = "META-INF/com/google/android/update-binary";
-  ZipEntry binary_entry;
+  ZipEntry64 binary_entry;
   if (FindEntry(zip, UPDATE_BINARY_NAME, &binary_entry) != 0) {
     LOG(ERROR) << "Failed to find update binary " << UPDATE_BINARY_NAME;
     return false;
@@ -336,6 +348,12 @@ static InstallResult TryUpdateBinary(Package* package, bool* wipe_cache,
   bool ab_device_supports_nonab =
       android::base::GetBoolProperty("ro.virtual_ab.allow_non_ab", false);
   bool device_only_supports_ab = device_supports_ab && !ab_device_supports_nonab;
+
+  const auto current_spl = android::base::GetProperty("ro.build.version.security_patch", "");
+  if (ViolatesSPLDowngrade(zip, current_spl)) {
+    LOG(ERROR) << "Denying OTA because it's SPL downgrade";
+    return INSTALL_ERROR;
+  }
 
   if (package_is_ab) {
     CHECK(package->GetType() == PackageType::kFile);
@@ -698,4 +716,19 @@ bool SetupPackageMount(const std::string& package_path, bool* should_use_fuse) {
     *should_use_fuse = false;
   }
   return true;
+}
+
+// Check if `target_token` is in string `str_list`, where `str_list` is expected to be a
+// list delimited by `deliminator`
+// E.X. isInStringList("a", "a|b|c|d", "|") => true
+// E.X. isInStringList("abc", "abc", "|") => true
+static bool isInStringList(const std::string& target_token, const std::string& str_list,
+                           const std::string& deliminator) {
+  if (target_token.length() > str_list.length()) {
+    return false;
+  } else if (target_token.length() == str_list.length() || deliminator.length() == 0) {
+    return target_token == str_list;
+  }
+  auto&& list = android::base::Split(str_list, deliminator);
+  return std::find(list.begin(), list.end(), target_token) != list.end();
 }

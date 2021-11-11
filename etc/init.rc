@@ -39,6 +39,7 @@ on init
     mount cgroup none /acct cpuacct
     mkdir /acct/uid
 
+    mkdir /sdcard
     mkdir /system
     mkdir /data
     symlink /data/cache /cache

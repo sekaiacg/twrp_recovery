@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2017 The Android Open Source Project
+<!-- Copyright (C) 2020 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,15 +13,16 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Config for minadbd_test">
-    <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
-        <option name="cleanup" value="true" />
-        <option name="push" value="minadbd_test->/data/local/tmp/minadbd_test" />
+<configuration description="Runs recovery_host_test.">
+    <option name="null-device" value="true" />
+
+    <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer">
+        <option name="force-root" value="false" />
     </target_preparer>
-    <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer"/>
-    <option name="test-suite-tag" value="apct" />
-    <test class="com.android.tradefed.testtype.GTest" >
-        <option name="native-test-device-path" value="/data/local/tmp" />
-        <option name="module-name" value="minadbd_test" />
+    <option name="not-shardable" value="true" />
+
+    <test class="com.android.tradefed.testtype.HostGTest" >
+        <option name="module-name" value="recovery_host_test" />
+        <option name="native-test-timeout" value="5m"/>
     </test>
 </configuration>

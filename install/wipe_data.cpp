@@ -97,14 +97,19 @@ bool WipeCache(const std::function<bool()>& confirm_func) {
   }
 
   // ui->Print("\n-- Wiping cache...\n");
-  bool success = EraseVolume("/cache", false);
-  // ui->Print("Cache wipe %s.\n", success ? "complete" : "failed");
+  // ui->SetBackground(RecoveryUI::ERASING);
+  // ui->SetProgressType(RecoveryUI::INDETERMINATE);
+
+  bool success = EraseVolume("/cache", ui, false);
+  ui->Print("Cache wipe %s.\n", success ? "complete" : "failed");
   return success;
 }
 
 bool WipeData(Device* device, bool convert_fbe) {
   // RecoveryUI* ui = device->GetUI();
   // ui->Print("\n-- Wiping data...\n");
+  // ui->SetBackground(RecoveryUI::ERASING);
+  // ui->SetProgressType(RecoveryUI::INDETERMINATE);
 
   // if (!FinishPendingSnapshotMerges(device)) {
   //   ui->Print("Unable to check update status or complete merge, cannot wipe partitions.\n");

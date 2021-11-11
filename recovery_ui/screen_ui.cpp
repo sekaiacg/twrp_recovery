@@ -37,6 +37,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <android-base/chrono_utils.h>
 #include <android-base/logging.h>
 #include <android-base/properties.h>
 #include <android-base/stringprintf.h>
@@ -448,7 +449,9 @@ void ScreenRecoveryUI::draw_foreground_locked() {
     int frame_height = gr_get_height(frame);
     int frame_x = (ScreenWidth() - frame_width) / 2;
     int frame_y = GetAnimationBaseline();
-    DrawSurface(frame, 0, 0, frame_width, frame_height, frame_x, frame_y);
+    if (frame_x >= 0 && frame_y >= 0 && (frame_x + frame_width) < ScreenWidth() &&
+        (frame_y + frame_height) < ScreenHeight())
+      DrawSurface(frame, 0, 0, frame_width, frame_height, frame_x, frame_y);
   }
 
   if (progressBarType != EMPTY) {
@@ -879,10 +882,28 @@ bool ScreenRecoveryUI::LoadWipeDataMenuText() {
   return true;
 }
 
+static bool InitGraphics() {
+  // Timeout is same as init wait for file default of 5 seconds and is arbitrary
+  const unsigned timeout = 500;  // 10ms increments
+  for (auto retry = timeout; retry > 0; --retry) {
+    if (gr_init() == 0) {
+      if (retry < timeout) {
+        // Log message like init wait for file completion log for consistency.
+        LOG(WARNING) << "wait for 'graphics' took " << ((timeout - retry) * 10) << "ms";
+      }
+      return true;
+    }
+    std::this_thread::sleep_for(10ms);
+  }
+  // Log message like init wait for file timeout log for consistency.
+  LOG(ERROR) << "timeout wait for 'graphics' took " << (timeout * 10) << "ms";
+  return false;
+}
+
 bool ScreenRecoveryUI::Init(const std::string& locale) {
   RecoveryUI::Init(locale);
 
-  if (gr_init() == -1) {
+  if (!InitGraphics()) {
     return false;
   }
 

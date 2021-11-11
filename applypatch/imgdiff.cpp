@@ -682,9 +682,9 @@ bool ZipModeImage::InitializeChunks(const std::string& filename, ZipArchiveHandl
   }
 
   // Create a list of deflated zip entries, sorted by offset.
-  std::vector<std::pair<std::string, ZipEntry>> temp_entries;
+  std::vector<std::pair<std::string, ZipEntry64>> temp_entries;
   std::string name;
-  ZipEntry entry;
+  ZipEntry64 entry;
   while ((ret = Next(cookie, &entry, &name)) == 0) {
     if (entry.method == kCompressDeflated || limit_ > 0) {
       temp_entries.emplace_back(name, entry);
@@ -712,8 +712,14 @@ bool ZipModeImage::InitializeChunks(const std::string& filename, ZipArchiveHandl
     // Add the end of zip file (mainly central directory) as a normal chunk.
     size_t entries_end = 0;
     if (!temp_entries.empty()) {
-      entries_end = static_cast<size_t>(temp_entries.back().second.offset +
-                                        temp_entries.back().second.compressed_length);
+      CHECK_GE(temp_entries.back().second.offset, 0);
+      if (__builtin_add_overflow(temp_entries.back().second.offset,
+                                 temp_entries.back().second.compressed_length, &entries_end)) {
+        LOG(ERROR) << "`entries_end` overflows on entry with offset "
+                   << temp_entries.back().second.offset << " and compressed_length "
+                   << temp_entries.back().second.compressed_length;
+        return false;
+      }
     }
     CHECK_LT(entries_end, file_content_.size());
     chunks_.emplace_back(CHUNK_NORMAL, entries_end, &file_content_,
@@ -735,8 +741,16 @@ bool ZipModeImage::InitializeChunks(const std::string& filename, ZipArchiveHandl
         LOG(ERROR) << "Failed to add " << entry_name << " to target chunks";
         return false;
       }
-
-      pos += temp_entries[nextentry].second.compressed_length;
+      if (temp_entries[nextentry].second.compressed_length > std::numeric_limits<size_t>::max()) {
+        LOG(ERROR) << "Entry " << name << " compressed size exceeds size of address space. "
+                   << entry.compressed_length;
+        return false;
+      }
+      if (__builtin_add_overflow(pos, temp_entries[nextentry].second.compressed_length, &pos)) {
+        LOG(ERROR) << "`pos` overflows after adding "
+                   << temp_entries[nextentry].second.compressed_length;
+        return false;
+      }
       ++nextentry;
       continue;
     }
@@ -757,7 +771,13 @@ bool ZipModeImage::InitializeChunks(const std::string& filename, ZipArchiveHandl
 }
 
 bool ZipModeImage::AddZipEntryToChunks(ZipArchiveHandle handle, const std::string& entry_name,
-                                       ZipEntry* entry) {
+                                       ZipEntry64* entry) {
+  if (entry->compressed_length > std::numeric_limits<size_t>::max()) {
+    LOG(ERROR) << "Failed to add " << entry_name
+               << " because's compressed size exceeds size of address space. "
+               << entry->compressed_length;
+    return false;
+  }
   size_t compressed_len = entry->compressed_length;
   if (compressed_len == 0) return true;
 
@@ -775,6 +795,12 @@ bool ZipModeImage::AddZipEntryToChunks(ZipArchiveHandle handle, const std::strin
     }
   } else if (entry->method == kCompressDeflated) {
     size_t uncompressed_len = entry->uncompressed_length;
+    if (uncompressed_len > std::numeric_limits<size_t>::max()) {
+      LOG(ERROR) << "Failed to add " << entry_name
+                 << " because's compressed size exceeds size of address space. "
+                 << uncompressed_len;
+      return false;
+    }
     std::vector<uint8_t> uncompressed_data(uncompressed_len);
     int ret = ExtractToMemory(handle, entry, uncompressed_data.data(), uncompressed_len);
     if (ret != 0) {
@@ -965,7 +991,7 @@ bool ZipModeImage::SplitZipModeImageWithLimit(const ZipModeImage& tgt_image,
         used_src_ranges.Insert(src_ranges);
         split_src_ranges->push_back(std::move(src_ranges));
       }
-      src_ranges.Clear();
+      src_ranges = {};
 
       // We don't have enough space for the current chunk; start a new split image and handle
       // this chunk there.
@@ -1035,23 +1061,24 @@ bool ZipModeImage::AddSplitImageFromChunkList(const ZipModeImage& tgt_image,
   }
 
   ZipModeImage split_tgt_image(false);
-  split_tgt_image.Initialize(std::move(aligned_tgt_chunks), {});
+  split_tgt_image.Initialize(aligned_tgt_chunks, {});
   split_tgt_image.MergeAdjacentNormalChunks();
 
-  // Construct the dummy source file based on the src_ranges.
-  std::vector<uint8_t> src_content;
+  // Construct the split source file based on the split src ranges.
+  std::vector<uint8_t> split_src_content;
   for (const auto& r : split_src_ranges) {
     size_t end = std::min(src_image.file_content_.size(), r.second * BLOCK_SIZE);
-    src_content.insert(src_content.end(), src_image.file_content_.begin() + r.first * BLOCK_SIZE,
-                       src_image.file_content_.begin() + end);
+    split_src_content.insert(split_src_content.end(),
+                             src_image.file_content_.begin() + r.first * BLOCK_SIZE,
+                             src_image.file_content_.begin() + end);
   }
 
   // We should not have an empty src in our design; otherwise we will encounter an error in
-  // bsdiff since src_content.data() == nullptr.
-  CHECK(!src_content.empty());
+  // bsdiff since split_src_content.data() == nullptr.
+  CHECK(!split_src_content.empty());
 
   ZipModeImage split_src_image(true);
-  split_src_image.Initialize(split_src_chunks, std::move(src_content));
+  split_src_image.Initialize(split_src_chunks, split_src_content);
 
   split_tgt_images->push_back(std::move(split_tgt_image));
   split_src_images->push_back(std::move(split_src_image));

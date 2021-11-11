@@ -49,9 +49,14 @@ std::vector<std::string> GetWipePartitionList(Package* wipe_package) {
   constexpr char RECOVERY_WIPE_ENTRY_NAME[] = "recovery.wipe";
 
   std::string partition_list_content;
-  ZipEntry entry;
+  ZipEntry64 entry;
   if (FindEntry(zip, RECOVERY_WIPE_ENTRY_NAME, &entry) == 0) {
-    uint32_t length = entry.uncompressed_length;
+    auto length = entry.uncompressed_length;
+    if (length > std::numeric_limits<size_t>::max()) {
+      LOG(ERROR) << "Failed to extract " << RECOVERY_WIPE_ENTRY_NAME
+                 << " because's uncompressed size exceeds size of address space. " << length;
+      return {};
+    }
     partition_list_content = std::string(length, '\0');
     if (auto err = ExtractToMemory(
             zip, &entry, reinterpret_cast<uint8_t*>(partition_list_content.data()), length);

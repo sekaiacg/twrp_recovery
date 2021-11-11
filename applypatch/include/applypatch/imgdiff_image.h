@@ -211,7 +211,7 @@ class ZipModeImage : public Image {
 
   bool Initialize(const std::string& filename) override;
 
-  // Initialize a dummy ZipModeImage from an existing ImageChunk vector. For src img pieces, we
+  // Initialize a fake ZipModeImage from an existing ImageChunk vector. For src img pieces, we
   // reconstruct a new file_content based on the source ranges; but it's not needed for the tgt img
   // pieces; because for each chunk both the data and their offset within the file are unchanged.
   void Initialize(const std::vector<ImageChunk>& chunks, const std::vector<uint8_t>& file_content) {
@@ -257,7 +257,8 @@ class ZipModeImage : public Image {
   // Initialize image chunks based on the zip entries.
   bool InitializeChunks(const std::string& filename, ZipArchiveHandle handle);
   // Add the a zip entry to the list.
-  bool AddZipEntryToChunks(ZipArchiveHandle handle, const std::string& entry_name, ZipEntry* entry);
+  bool AddZipEntryToChunks(ZipArchiveHandle handle, const std::string& entry_name,
+                           ZipEntry64* entry);
   // Return the real size of the zip file. (omit the trailing zeros that used for alignment)
   bool GetZipFileSize(size_t* input_file_size);
 
@@ -265,7 +266,7 @@ class ZipModeImage : public Image {
                                   const std::vector<ZipModeImage>& split_src_images,
                                   std::vector<SortedRangeSet>& split_src_ranges,
                                   size_t total_tgt_size);
-  // Construct the dummy split images based on the chunks info and source ranges; and move them into
+  // Construct the fake split images based on the chunks info and source ranges; and move them into
   // the given vectors. Return true if we add a new split image into |split_tgt_images|, and
   // false otherwise.
   static bool AddSplitImageFromChunkList(const ZipModeImage& tgt_image,

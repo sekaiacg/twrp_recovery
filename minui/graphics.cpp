@@ -618,7 +618,7 @@ int gr_init() {
            ret);
   }
 
-  auto backend = std::unique_ptr<MinuiBackend>{ std::make_unique<MinuiBackendAdf>() };
+  auto backend = std::unique_ptr<MinuiBackend>{ std::make_unique<MinuiBackendDrm>() };
   gr_draw = backend->Init();
 
 #ifdef MSM_BSP
