@@ -260,6 +260,11 @@ bool twrpRepacker::Repack_Image_And_Flash(const std::string& Target_Image, const
 	}}
 	TWFunc::removeDir(REPACK_NEW_DIR, false);
 	gui_msg(Msg(msg::kWarning, "repack_overwrite_warning=If device was previously rooted, then root has been overwritten and will need to be reinstalled."));
+	string Current_Slot = PartitionManager.Get_Active_Slot_Display();
+		if (Current_Slot == "A")
+			PartitionManager.Override_Active_Slot("B");
+		else
+			PartitionManager.Override_Active_Slot("A");
 	return true;
 }
 
