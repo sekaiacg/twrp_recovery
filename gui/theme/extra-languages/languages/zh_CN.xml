@@ -775,5 +775,8 @@
 		<string name="reboot_after_restore">建议在 Android 首次启动后再重启一次。</string>
 
 		<string name="install_took_seconds_msg">安装耗时 {1} 秒。</string>
+		<string name="prevent_auto_install_stock_rec">阻止自动恢复官方 Recovery</string>
+		<string name="prevent_auto_install_stock_rec_success_msg">阻止自动恢复官方 Recovery 成功！</string>
+		<string name="prevented_auto_install_stock_rec_msg">已阻止自动恢复官方 Recovery！</string>
 	</resources>
 </language>

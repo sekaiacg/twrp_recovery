@@ -238,6 +238,17 @@ static int Run_Update_Binary(const char *path, int* wipe_cache, zip_type ztype) 
 	return INSTALL_SUCCESS;
 }
 
+static constexpr const char* UPDATE_DYNAMIC_PART_OP_LIST_NAME = "dynamic_partitions_op_list";
+static constexpr const char* UPDATE_SUPER_IMAGE_ZST = "super.zst";
+
+bool isUpdatePkg(ZipArchiveHandle Zip) {
+	ZipEntry64 find_entry;
+	if (FindEntry(Zip, UPDATE_DYNAMIC_PART_OP_LIST_NAME, &find_entry) == 0) return true;
+	if (FindEntry(Zip, UPDATE_SUPER_IMAGE_ZST, &find_entry) == 0) return true;
+	if (FindEntry(Zip, AB_OTA, &find_entry) == 0) return true;
+	return false;
+}
+
 int TWinstall_zip(const char* path, int* wipe_cache, bool check_for_digest) {
 	int ret_val, zip_verify = 1, unmount_system = 1, reflashtwrp = 0;
 
@@ -295,6 +306,8 @@ int TWinstall_zip(const char* path, int* wipe_cache, bool check_for_digest) {
 		return INSTALL_CORRUPT;
 	}
 
+	bool _isUpdatePkg = isUpdatePkg(Zip), _isABUpdatePkg = false;
+
 	if (unmount_system) {
 		gui_msg("unmount_system=Unmounting System...");
 		if(!PartitionManager.UnMount_By_Path(PartitionManager.Get_Android_Root_Path(), true)) {
@@ -325,6 +338,7 @@ int TWinstall_zip(const char* path, int* wipe_cache, bool check_for_digest) {
 		std::string ab_binary_name(AB_OTA);
 		ZipEntry64 ab_binary_entry;
 		if (FindEntry(Zip, ab_binary_name, &ab_binary_entry) == 0) {
+			_isABUpdatePkg = true;
 			LOGINFO("AB zip\n");
 			gui_msg(Msg(msg::kHighlight, "flash_ab_inactive=Flashing A/B zip to inactive slot: {1}")(PartitionManager.Get_Active_Slot_Display()=="A"?"B":"A"));
 			// We need this so backuptool can do its magic
@@ -373,5 +387,8 @@ int TWinstall_zip(const char* path, int* wipe_cache, bool check_for_digest) {
 
 	if (ret_val == INSTALL_SUCCESS) gui_msg(Msg(msg::kHighlight, "install_took_seconds_msg=Install took {1} second(s).")(total_time));
 
+	if (_isUpdatePkg && ret_val == INSTALL_SUCCESS) {
+		if (!_isABUpdatePkg && DataManager::GetIntValue(TW_PREVENT_AUTO_INSTALL_STOCK_REC_VAR)) PartitionManager.Prevent_Install_Stock_Rec(true);
+	}
 	return ret_val;
 }

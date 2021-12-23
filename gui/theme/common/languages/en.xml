@@ -780,5 +780,8 @@
 		<string name="reboot_after_restore">It is recommended to reboot Android once after first boot.</string>
 
 		<string name="install_took_seconds_msg">Install took {1} second(s).</string>
+		<string name="prevent_auto_install_stock_rec">Prevent auto install of stock Recovery</string>
+		<string name="prevent_auto_install_stock_rec_success_msg">Prevent auto installation of stock Recovery success!</string>
+		<string name="prevented_auto_install_stock_rec_msg">Prevented auto installation of stock Recovery.</string>
 	</resources>
 </language>
