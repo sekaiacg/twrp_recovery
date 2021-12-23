@@ -739,6 +739,7 @@
 		<string name="enable_adb">启用 ADB</string>
 		<string name="enable_fastboot">启用 Fastboot</string>
 		<string name="fastboot_console_msg">进入 Fastboot 模式…</string>
+		<string name="data_media_fbe_msg">TWRP 不会在FBE设备上重新创建 /data/media，请重新启动到您的 Rom 来创建 /data/media！</string>
 		<!-- Android Rescue Party trigger -->
 		<string name="rescue_party0">Android 救援程序已触发！您可以尝试下面的操作：</string>
 		<string name="rescue_party1"> 1. 清除 Cache；</string>
