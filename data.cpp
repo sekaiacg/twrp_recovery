@@ -1140,17 +1140,22 @@ void DataManager::ReadSettingsFile(void)
 
 	memset(mkdir_path, 0, sizeof(mkdir_path));
 	memset(settings_file, 0, sizeof(settings_file));
-	sprintf(mkdir_path, "%s%s", GetSettingsStoragePath().c_str(), GetStrValue(TW_RECOVERY_FOLDER_VAR).c_str());
+	sprintf(mkdir_path, "%s%s", PERSIST_MOUNT_POINT, "/TWRP");
 	sprintf(settings_file, "%s/%s", mkdir_path, TW_SETTINGS_FILE);
 
+	/*
 	if (!PartitionManager.Mount_Settings_Storage(false))
 	{
 		usleep(500000);
 		if (!PartitionManager.Mount_Settings_Storage(false))
 			gui_msg(Msg(msg::kError, "unable_to_mount=Unable to mount {1}")(settings_file));
 	}
-
+	*/
+	
+	bool persist_is_mounted = PartitionManager.Is_Mounted_By_Path(PERSIST_MOUNT_POINT);
+	if(!persist_is_mounted) PartitionManager.Mount_By_Path(PERSIST_MOUNT_POINT, false);
 	mkdir(mkdir_path, 0777);
+	if (!persist_is_mounted) PartitionManager.UnMount_By_Path(PERSIST_MOUNT_POINT, false);
 
 	LOGINFO("Attempt to load settings from settings file...\n");
 	LoadValues(settings_file);

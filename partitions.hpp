@@ -36,6 +36,8 @@
 #define REPACK_ORIG_DIR "/tmp/repackorig/"
 #define REPACK_NEW_DIR "/tmp/repacknew/"
 
+static constexpr const char* PERSIST_MOUNT_POINT = "/persist";
+
 using namespace std;
 
 // BasePartition is used for overriding so we can run custom, device

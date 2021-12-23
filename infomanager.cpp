@@ -59,9 +59,21 @@ void InfoManager::Clear(void) {
 	mValues.clear();
 }
 
+static bool persist_is_mounted = false;
+
+void persist_mount(void) {
+	persist_is_mounted = PartitionManager.Is_Mounted_By_Path(PERSIST_MOUNT_POINT);
+	if (!persist_is_mounted) PartitionManager.Mount_By_Path(PERSIST_MOUNT_POINT, false);
+}
+
+void persist_unmount(void) {
+	if (!persist_is_mounted) PartitionManager.UnMount_By_Path(PERSIST_MOUNT_POINT, false);
+}
+
 int InfoManager::LoadValues(void) {
 	string str;
 
+    persist_mount();
 	// Read in the file, if possible
 	FILE* in = fopen(File.c_str(), "rb");
 	if (!in) {
@@ -108,8 +120,10 @@ int InfoManager::LoadValues(void) {
 			mValues.insert(make_pair(Name, Value));
 		}
 	}
+	persist_unmount();
 error:
 	fclose(in);
+	persist_unmount();
 	return 0;
 }
 
@@ -117,7 +131,7 @@ int InfoManager::SaveValues(void) {
 	if (File.empty())
 		return -1;
 
-	PartitionManager.Mount_By_Path(File, true);
+	persist_mount();
 	LOGINFO("InfoManager saving '%s'\n", File.c_str());
 	FILE* out = fopen(File.c_str(), "wb");
 	if (!out)
@@ -138,6 +152,7 @@ int InfoManager::SaveValues(void) {
 	}
 	fclose(out);
 	tw_set_default_metadata(File.c_str());
+	persist_unmount();
 	return 0;
 }
 
