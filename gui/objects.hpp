@@ -330,6 +330,7 @@ protected:
 	int checkforapp(std::string arg);
 	int unmapsuperdevices(std::string arg);
 	int removedynamicgroups(std:: string arg);
+	int preCustomFlashzip(std::string arg);
 
 	// (originally) threaded actions
 	int fileexists(std::string arg);
@@ -379,6 +380,7 @@ protected:
 	int changeterminal(std::string arg);
 	int applycustomtwrpfolder(std::string arg);
 	int mergesnapshots(std::string arg);
+	int customFlashzip(std::string arg);
 #ifndef TW_EXCLUDE_NANO
 	int editfile(std::string arg);
 #endif
