@@ -783,5 +783,8 @@
 		<string name="prevent_auto_install_stock_rec">Prevent auto install of stock Recovery</string>
 		<string name="prevent_auto_install_stock_rec_success_msg">Prevent auto installation of stock Recovery success!</string>
 		<string name="prevented_auto_install_stock_rec_msg">Prevented auto installation of stock Recovery.</string>
+		<string name="custom_install_confirm">Install {1} ?</string>
+		<string name="custom_installing">Installing {1}...</string>
+		<string name="custom_installing_complete">Installed {1} !</string>
 	</resources>
 </language>
