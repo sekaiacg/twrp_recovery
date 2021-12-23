@@ -64,6 +64,7 @@
 	#include "openaes/inc/oaes_lib.h"
 #endif
 #include "set_metadata.h"
+#include "minuitwrp/minui.h"
 
 extern "C" {
 	#include "libcrecovery/common.h"
@@ -434,6 +435,14 @@ bool TWFunc::File_Exists(const string& path)
 		return !S_ISDIR(st.st_mode);
 	}
 	return false;
+}
+
+void TWFunc::Screenshot(const string& path)
+{
+	int res = gr_save_screenshot(path.c_str());
+	if (res == 0) {
+		chmod(path.c_str(), 0777);
+	}
 }
 
 #ifndef BUILD_TWRPTAR_MAIN
