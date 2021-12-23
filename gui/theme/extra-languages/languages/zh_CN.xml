@@ -778,5 +778,8 @@
 		<string name="prevent_auto_install_stock_rec">阻止自动恢复官方 Recovery</string>
 		<string name="prevent_auto_install_stock_rec_success_msg">阻止自动恢复官方 Recovery 成功！</string>
 		<string name="prevented_auto_install_stock_rec_msg">已阻止自动恢复官方 Recovery！</string>
+		<string name="custom_install_confirm">是否安装 {1} ?</string>
+		<string name="custom_installing">正在安装 {1}...</string>
+		<string name="custom_installing_complete">{1} 安装完成！</string>
 	</resources>
 </language>
