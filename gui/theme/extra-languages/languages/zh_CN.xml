@@ -781,5 +781,7 @@
 		<string name="custom_install_confirm">是否安装 {1} ?</string>
 		<string name="custom_installing">正在安装 {1}...</string>
 		<string name="custom_installing_complete">{1} 安装完成！</string>
+		<string name="install_magisk">安装 Magisk</string>
+		<string name="install_magisk_alpha">安装 Magisk Alpha</string>
 	</resources>
 </language>

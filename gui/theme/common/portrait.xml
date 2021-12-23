@@ -3872,6 +3872,28 @@
 					<condition var1="tw_is_decrypted" var2="1"/>
 					<action function="page">changeTwrpFolder</action>
 				</listitem>
+				<listitem name="{@install_magisk=Install Magisk}">
+					<actions>
+						<action function="set">tw_back=advanced</action>
+						<action function="set">tw_customZipVerPath=/customzip/Magisk/MagiskVer</action>
+						<action function="set">tw_customZipPath=/customzip/Magisk/Magisk.apk</action>
+						<action function="preCustomFlashzip"/>
+						<action function="set">tw_action=customFlashzip</action>
+						<action function="set">tw_slider_text={@swipe_to_confirm=Swipe to Confirm}</action>
+						<action function="page">confirm_action</action>
+					</actions>
+				</listitem>
+				<listitem name="{@install_magisk_alpha=Install Magisk Alpha}">
+					<actions>
+						<action function="set">tw_back=advanced</action>
+						<action function="set">tw_customZipVerPath=/customzip/Magisk/MagiskAlphaVer</action>
+						<action function="set">tw_customZipPath=/customzip/Magisk/MagiskAlpha.apk</action>
+						<action function="preCustomFlashzip"/>
+						<action function="set">tw_action=customFlashzip</action>
+						<action function="set">tw_slider_text={@swipe_to_confirm=Swipe to Confirm}</action>
+						<action function="page">confirm_action</action>
+					</actions>
+				</listitem>
 				<listitem name="{@decrypt_users=Decrypt Users}">
 					<conditions>
 						<condition var1="tw_is_fbe" var2="1"/>
