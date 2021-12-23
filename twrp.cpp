@@ -237,7 +237,7 @@ static void process_recovery_mode(twrpAdbBuFifo* adb_bu_fifo, bool skip_decrypti
 		TWFunc::Fixup_Time_On_Boot();
 
 	DataManager::LoadTWRPFolderInfo();
-	DataManager::ReadSettingsFile();
+	//DataManager::ReadSettingsFile();
 
 	// Run any outstanding OpenRecoveryScript
 	std::string cacheDir = TWFunc::get_log_dir();
@@ -285,7 +285,7 @@ static void process_recovery_mode(twrpAdbBuFifo* adb_bu_fifo, bool skip_decrypti
 				if (!created)
 					LOGERR("Unable to create log directory for TWRP\n");
 			}
-			DataManager::ReadSettingsFile();
+			//DataManager::ReadSettingsFile();
 #endif
 		} else {
 			if ((DataManager::GetIntValue("tw_mount_system_ro") == 0 && sys->Check_Lifetime_Writes() == 0) || DataManager::GetIntValue("tw_mount_system_ro") == 2) {
@@ -416,6 +416,9 @@ int main(int argc, char **argv) {
 	// Load up all the resources
 	gui_loadResources();
 
+	DataManager::ReadSettingsFile();
+	PageManager::LoadLanguage(DataManager::GetStrValue("tw_language"));
+
 	std::string value;
 	static char charging = ' ';
 	static int lastVal = -1;
@@ -488,7 +491,7 @@ int main(int argc, char **argv) {
 		process_recovery_mode(adb_bu_fifo, startup.Should_Skip_Decryption());
 	}
 
-	PageManager::LoadLanguage(DataManager::GetStrValue("tw_language"));
+	//PageManager::LoadLanguage(DataManager::GetStrValue("tw_language"));
 	GUIConsole::Translate_Now();
 
 	TWFunc::checkforapp(); //Checking compatibility for TWRP app
