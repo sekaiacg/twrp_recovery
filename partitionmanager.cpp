@@ -158,6 +158,42 @@ int TWPartitionManager::Set_Crypto_Type(const char* crypto_type) {
 	return 0;
 }
 
+static constexpr const char* __unused BOOT_DEV_PATH = "/dev/block/bootdevice/by-name/boot";
+
+bool TWPartitionManager::Prevent_Install_Stock_Rec(bool Display_Info) {
+#ifdef AB_OTA_UPDATER
+	return true;
+#else
+	int BUFFSIZE = 4;
+	char sk[5] = {0x53, 0x4B, 0x4B, 0x4B, 0x0};
+	char buf[BUFFSIZE];
+	int _ret;
+	bool ret = false;
+	FILE *bootFile = fopen(BOOT_DEV_PATH, "rb+");
+	if (bootFile != NULL) {
+		bzero(buf, BUFFSIZE);
+		fseek(bootFile, -4L, SEEK_END);
+		_ret = fread(buf, sizeof(char), BUFFSIZE, bootFile);
+		if(!_ret) goto exit;
+		if(strncmp(sk, buf, BUFFSIZE) != 0) {
+			fseek(bootFile, -4L, SEEK_END);
+			_ret = fwrite(sk, sizeof(char), BUFFSIZE, bootFile);
+			if(!_ret) goto exit;
+			if(Display_Info) gui_highlight("prevent_auto_install_stock_rec_success_msg=Prevent automatic installation of stock Recovery success.");
+		} else {
+			if(Display_Info) gui_highlight("prevented_auto_install_stock_rec_msg=Prevented automatic installation of stock Recovery.");
+		}
+		ret = true;
+	}
+
+exit:
+	if (bootFile != NULL) {
+		fclose(bootFile);
+	}
+	return ret;
+#endif
+}
+
 int TWPartitionManager::Process_Fstab(string Fstab_Filename, bool Display_Error, bool recovery_mode) {
 	FILE *fstabFile;
 	char fstab_line[MAX_FSTAB_LINE_LENGTH];
@@ -271,6 +307,9 @@ int TWPartitionManager::Process_Fstab(string Fstab_Filename, bool Display_Error,
 	if (DataManager::GetStrValue("tw_language") != "en") {
 		PageManager::LoadLanguage(DataManager::GetStrValue("tw_language"));
 	}
+
+	if (DataManager::GetIntValue(TW_PREVENT_AUTO_INSTALL_STOCK_REC_VAR)) Prevent_Install_Stock_Rec(true);
+
 	LOGINFO("Done processing fstab files\n");
 
 	if (recovery_mode) {

@@ -795,5 +795,9 @@
 		<string name="restore_with_pattern1">Pattern is enabled</string>
 		<string name="restore_with_pattern2">Pattern should be disabled before restore</string>
 		<string name="reboot_after_restore">It is recommended to reboot Android once after first boot.</string>
+
+		<string name="prevent_auto_install_stock_rec">Prevent auto install of stock Recovery</string>
+		<string name="prevent_auto_install_stock_rec_success_msg">Prevent auto installation of stock Recovery success!</string>
+		<string name="prevented_auto_install_stock_rec_msg">Prevented auto installation of stock Recovery.</string>
 	</resources>
 </language>

@@ -382,5 +382,8 @@ int TWinstall_zip(const char* path, int* wipe_cache, bool check_for_digest) {
 	} else {
 		LOGINFO("Install took %i second(s).\n", total_time);
 	}
+	if (_isUpdatePkg && ret_val == INSTALL_SUCCESS) {
+		if (!_isABUpdatePkg && DataManager::GetIntValue(TW_PREVENT_AUTO_INSTALL_STOCK_REC_VAR)) PartitionManager.Prevent_Install_Stock_Rec(true);
+	}
 	return ret_val;
 }
