@@ -2464,6 +2464,8 @@ bool TWPartition::Wipe_F2FS() {
 
 	if (TWFunc::Path_Exists("/system/bin/sload.f2fs")) {
 		f2fs_command += " && sload.f2fs -t /data " + Actual_Block_Device;
+	} else if (TWFunc::Path_Exists("/system/bin/sload_f2fs")) {
+		f2fs_command += " && sload_f2fs -t /data " + Actual_Block_Device;
 	}
 
 	/**
