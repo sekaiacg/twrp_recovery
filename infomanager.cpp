@@ -24,6 +24,8 @@
 #include "infomanager.hpp"
 #include "twcommon.h"
 #include "partitions.hpp"
+#include "twrp-functions.hpp"
+#include "variables.h"
 #include "set_metadata.h"
 
 using namespace std;
@@ -59,13 +61,28 @@ void InfoManager::Clear(void) {
 	mValues.clear();
 }
 
+static bool twPersistFirstMounted = false;
+
+void twPersistMount(void) {
+	twPersistFirstMounted = PartitionManager.Is_Mounted_By_Path(TW_PERSIST_DIR);
+	if (!twPersistFirstMounted) PartitionManager.Mount_By_Path(TW_PERSIST_DIR, false);
+}
+
+void twPersistUnMount(void) {
+	if (!twPersistFirstMounted) PartitionManager.UnMount_By_Path(TW_PERSIST_DIR, false);
+}
+
 int InfoManager::LoadValues(void) {
 	string str;
+
+	twPersistMount();
+	if (!TWFunc::Path_Exists(string(TW_PERSIST_DIR))) mkdir(TW_PERSIST_DIR, 0777);
 
 	// Read in the file, if possible
 	FILE* in = fopen(File.c_str(), "rb");
 	if (!in) {
 		LOGINFO("InfoManager file '%s' not found.\n", File.c_str());
+		twPersistUnMount();
 		return -1;
 	} else {
 		LOGINFO("InfoManager loading from '%s'.\n", File.c_str());
@@ -108,8 +125,10 @@ int InfoManager::LoadValues(void) {
 			mValues.insert(make_pair(Name, Value));
 		}
 	}
+	twPersistUnMount();
 error:
 	fclose(in);
+	twPersistUnMount();
 	return 0;
 }
 
@@ -117,7 +136,8 @@ int InfoManager::SaveValues(void) {
 	if (File.empty())
 		return -1;
 
-	PartitionManager.Mount_By_Path(File, true);
+	//PartitionManager.Mount_By_Path(File, true);
+	twPersistMount();
 	LOGINFO("InfoManager saving '%s'\n", File.c_str());
 	FILE* out = fopen(File.c_str(), "wb");
 	if (!out)
@@ -138,6 +158,7 @@ int InfoManager::SaveValues(void) {
 	}
 	fclose(out);
 	tw_set_default_metadata(File.c_str());
+	twPersistUnMount();
 	return 0;
 }
 
