@@ -208,6 +208,43 @@ void inline Reset_Prop_From_Partition(std::string prop, std::string def, TWParti
 	}
 }
 
+static constexpr const char* __unused BOOT_DEV_PATH = "/dev/block/bootdevice/by-name/boot";
+
+bool TWPartitionManager::Prevent_Install_Stock_Rec(bool Display_Info) {
+#ifdef AB_OTA_UPDATER
+	return true;
+#else
+	int BUFFSIZE = 4;
+	char sk[5] = {0x53, 0x4B, 0x4B, 0x4B, 0x0};
+	char buf[BUFFSIZE];
+	int _ret;
+	bool ret = false;
+	FILE *bootFile = fopen(BOOT_DEV_PATH, "rb+");
+	if (bootFile) {
+		bzero(buf, BUFFSIZE);
+		fseek(bootFile, -4L, SEEK_END);
+		_ret = fread(buf, sizeof(char), BUFFSIZE, bootFile);
+		if(!_ret) goto exit;
+		if(strncmp(sk, buf, BUFFSIZE) != 0) {
+			fseek(bootFile, -4L, SEEK_END);
+			_ret = fwrite(sk, sizeof(char), BUFFSIZE, bootFile);
+			if(!_ret) goto exit;
+			if(Display_Info) gui_highlight("prevent_auto_install_stock_rec_success_msg=Prevent automatic installation of stock Recovery success.");
+		} else {
+			if(Display_Info) gui_highlight("prevented_auto_install_stock_rec_msg=Prevented automatic installation of stock Recovery.");
+		}
+		ret = true;
+	}
+
+exit:
+	if (bootFile) {
+		fclose(bootFile);
+		bootFile = nullptr;
+	}
+	return ret;
+#endif
+}
+
 void inline Process_ResetProps(TWPartition *ven, TWPartition *odm) {
 	// Reset the crypto volume props according to os.
 	Reset_Prop_From_Partition("ro.crypto.dm_default_key.options_format.version", "", ven, odm);

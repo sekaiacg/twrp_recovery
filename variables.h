@@ -82,6 +82,8 @@
 #define TW_TIME_ZONE_VAR            "tw_time_zone"
 #define TW_RM_RF_VAR                "tw_rm_rf"
 
+#define TW_PREVENT_AUTO_INSTALL_STOCK_REC_VAR     "tw_prevent_auto_install_stock_rec"
+
 #define TW_BACKUPS_FOLDER_VAR       "tw_backups_folder"
 #define TW_RECOVERY_FOLDER_VAR      "tw_recovery_folder"
 

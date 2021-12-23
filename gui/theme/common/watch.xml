@@ -3805,6 +3805,10 @@
 
 			<listbox style="scrolllist">
 				<placement x="%col1_x_left%" y="%row2_header_y%" w="%content_width%" h="%listbox_settings_height%"/>
+				<listitem name="{@prevent_auto_install_stock_rec=Prevent auto install of stock Recovery}">
+					<condition var1="tw_has_boot_slots" var2="0"/>
+					<data variable="tw_prevent_auto_install_stock_rec"/>
+				</listitem>
 				<listitem name="{@zip_sig_chk=Zip signature verification}">
 					<data variable="tw_signed_zip_verify"/>
 				</listitem>
