@@ -786,5 +786,7 @@
 		<string name="custom_install_confirm">Install {1} ?</string>
 		<string name="custom_installing">Installing {1}...</string>
 		<string name="custom_installing_complete">Installed {1} !</string>
+		<string name="install_magisk">Install Magisk</string>
+		<string name="install_magisk_alpha">Install Magisk Alpha</string>
 	</resources>
 </language>
