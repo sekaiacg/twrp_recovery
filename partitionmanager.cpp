@@ -267,6 +267,10 @@ int TWPartitionManager::Process_Fstab(string Fstab_Filename, bool Display_Error,
 	if (Get_Super_Status()) {
 		Setup_Super_Devices();
 	}
+	DataManager::ReadSettingsFile();
+	if (DataManager::GetStrValue("tw_language") != "en") {
+		PageManager::LoadLanguage(DataManager::GetStrValue("tw_language"));
+	}
 	LOGINFO("Done processing fstab files\n");
 
 	if (recovery_mode) {

@@ -100,7 +100,6 @@ static void Decrypt_Page(bool SkipDecryption, bool datamedia) {
 static void process_fastbootd_mode() {
 		LOGINFO("starting fastboot\n");
 
-#ifdef TW_LOAD_VENDOR_MODULES
 		printf("=> Linking mtab\n");
 		symlink("/proc/mounts", "/etc/mtab");
 		std::string fstab_filename = "/etc/twrp.fstab";
@@ -112,6 +111,8 @@ static void process_fastbootd_mode() {
 			LOGERR("Failing out of recovery due to problem with fstab.\n");
 			return;
 		}
+
+#ifdef TW_LOAD_VENDOR_MODULES
 		TWPartition* ven = PartitionManager.Find_Partition_By_Path("/vendor");
 		PartitionManager.Setup_Super_Devices();
 		PartitionManager.Prepare_Super_Volume(ven);
