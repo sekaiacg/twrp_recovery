@@ -739,7 +739,9 @@ void TWPartition::Setup_Data_Partition(bool Display_Error) {
 		property_get("ro.crypto.state", crypto_state, "error");
 		if (!Decrypt_FBE_DE() && strcmp(crypto_state, "error") != 0) {
 			if (is_device_fbe == 1)
-				LOGERR("Unable to decrypt FBE device\n");
+				gui_err("unable_to_decrypt_fbe_device_mgs=Unable to decrypt FBE device.");
+				gui_warn("unable_to_decrypt_fbe_device_msg2=If your device is not encrypted, decrypting the FEB device will fail.");
+				//LOGERR("Unable to decrypt FBE device\n");
 		} else {
 			DataManager::SetValue(TW_IS_ENCRYPTED, 0);
 			#ifndef TW_PREPARE_DATA_MEDIA_EARLY
