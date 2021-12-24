@@ -410,6 +410,7 @@ public:
 	bool Unmap_Super_Devices();                                               // Unmap super devices in TWRP
 	bool Check_Pending_Merges();                                              // Check and run pending merges on data for VAB devices
 	bool Prevent_Install_Stock_Rec(bool Display_Info);                        // Prevent automatic installation of stock Recovery
+	bool Disable_AVB2(bool Display_Info);                                     // Disable AVB2.0
 
 private:
 	void Setup_Settings_Storage_Partition(TWPartition* Part);                 // Sets up settings storage
