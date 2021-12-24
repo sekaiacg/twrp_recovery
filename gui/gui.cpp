@@ -775,6 +775,7 @@ extern "C" int gui_init(void)
 		PageManager::Render();
 		flip();
 		PageManager::ReleasePackage("splash");
+		TWFunc::Screenshot("/tmp/bootui.png");
 	}
 
 #ifdef TW_DELAY_TOUCH_INIT_MS
