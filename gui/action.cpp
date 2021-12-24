@@ -249,6 +249,7 @@ GUIAction::GUIAction(xml_node<>* node)
 #endif
 		ADD_ACTION(mergesnapshots);
 		ADD_ACTION(customFlashzip);
+		ADD_ACTION(disableAVB2);
 	}
 
 	// First, get the action
@@ -2384,6 +2385,17 @@ int GUIAction::customFlashzip(string arg __unused)
 	operation_start("Custom Flashzip");
 	string zipPath = DataManager::GetStrValue("tw_customZipPath");
 	op_status = flash_zip(zipPath, &wipe_cache);
+	operation_end(op_status);
+	return 0;
+}
+
+int GUIAction::disableAVB2(string arg __unused) {
+	int op_status = 1;
+	operation_start("Disable AVB2.0");
+	gui_highlight("disabling_AVB2=Disabling AVB2.0...");
+	if (PartitionManager.Disable_AVB2(true)) {
+		op_status = 0;
+	}
 	operation_end(op_status);
 	return 0;
 }

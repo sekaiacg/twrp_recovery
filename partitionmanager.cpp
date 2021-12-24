@@ -245,6 +245,58 @@ exit:
 #endif
 }
 
+#define AVB_MAGIC "AVB0"
+#define AVB_MAGIC_LEN 4
+#define AVB_VBMETA_FLAGS_OFFSET 123
+
+bool Do_Disable_AVB2(string File_Name, char Disable_Flags, bool Display_Info) {
+	char AVB_MAGIC_BUF[AVB_MAGIC_LEN + 1] = {0}, flags_buf[1] = {0};
+	int _ret;
+	bool ret = false;
+	string dev = "/dev/block/bootdevice/by-name/";
+
+	FILE *vbmetaFile = fopen((dev + File_Name).c_str(), "rb+");
+	if (vbmetaFile != NULL) {
+		fread(&AVB_MAGIC_BUF, AVB_MAGIC_LEN, 1, vbmetaFile);
+		if(strncmp(AVB_MAGIC, AVB_MAGIC_BUF, AVB_MAGIC_LEN) != 0) goto exit;
+		fseek(vbmetaFile, AVB_VBMETA_FLAGS_OFFSET, SEEK_SET);
+		_ret = fread(&flags_buf, 1, 1, vbmetaFile);
+		if(!_ret) goto exit;
+		if (flags_buf[0] != Disable_Flags) {
+			fseek(vbmetaFile, AVB_VBMETA_FLAGS_OFFSET, SEEK_SET);
+			_ret = fwrite(&Disable_Flags, 1, 1, vbmetaFile);
+			if(!_ret) goto exit;
+		}
+		ret = true;
+	}
+
+exit:
+	if (vbmetaFile) {
+		fclose(vbmetaFile);
+		vbmetaFile = nullptr;
+	}
+	if (Display_Info) {
+		auto msg = ret ? Msg(msg::kHighlight, "disable_avb2_success_msg=Disable AVB2.0: processing '{1}' successfully.")(File_Name)
+						: Msg(msg::kError, "disable_avb2_fail_msg=Disable AVB2.0: processing '{1}' failed!")(File_Name);
+		gui_msg(msg);
+	}
+	return ret;
+}
+
+bool TWPartitionManager::Disable_AVB2(bool Display_Info) {
+	char disable_flags = AVB_VBMETA_IMAGE_FLAGS_VERIFICATION_DISABLED;
+
+#ifdef AB_OTA_UPDATER
+	return Do_Disable_AVB2("vbmeta_a", disable_flags, Display_Info)
+			& Do_Disable_AVB2("vbmeta_system_a", disable_flags, Display_Info)
+			& Do_Disable_AVB2("vbmeta_b", disable_flags, Display_Info)
+			& Do_Disable_AVB2("vbmeta_system_b", disable_flags, Display_Info);
+#else
+	return Do_Disable_AVB2("vbmeta", disable_flags, Display_Info)
+			& Do_Disable_AVB2("vbmeta_system", disable_flags, Display_Info);
+#endif
+}
+
 void inline Process_ResetProps(TWPartition *ven, TWPartition *odm) {
 	// Reset the crypto volume props according to os.
 	Reset_Prop_From_Partition("ro.crypto.dm_default_key.options_format.version", "", ven, odm);

@@ -83,6 +83,7 @@
 #define TW_RM_RF_VAR                "tw_rm_rf"
 
 #define TW_PREVENT_AUTO_INSTALL_STOCK_REC_VAR     "tw_prevent_auto_install_stock_rec"
+#define TW_AUTO_DISABLE_AVB2_VAR                  "tw_auto_disable_avb2"
 
 #define TW_BACKUPS_FOLDER_VAR       "tw_backups_folder"
 #define TW_RECOVERY_FOLDER_VAR      "tw_recovery_folder"

@@ -382,6 +382,7 @@ protected:
 	int applycustomtwrpfolder(std::string arg);
 	int mergesnapshots(std::string arg);
 	int customFlashzip(std::string arg);
+	int disableAVB2(std::string arg);
 #ifndef TW_EXCLUDE_NANO
 	int editfile(std::string arg);
 #endif
