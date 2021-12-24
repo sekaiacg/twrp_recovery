@@ -608,7 +608,9 @@ void TWPartitionManager::Decrypt_Data() {
 					usleep(500);
 				if (Decrypt_Data->Mount(false)) {
 					if (!Decrypt_Data->Decrypt_FBE_DE()) {
-						LOGERR("Unable to decrypt FBE device\n");
+						gui_err("unable_to_decrypt_fbe_device_mgs=Unable to decrypt FBE device.");
+						gui_warn("unable_to_decrypt_fbe_device_msg2=If your device is not encrypted, decrypting the FEB device will fail.");
+						//LOGERR("Unable to decrypt FBE device\n");
 					}
 
 				} else {
