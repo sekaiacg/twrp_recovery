@@ -10,8 +10,10 @@
 
 	<resources>
 		<font name="font_l" filename="RobotoCondensed-Regular.ttf" size="52"/>
+		<font name="font_c" filename="DroidSansFallback.ttf" size="52" />
 		<image name="splashlogo" filename="splashlogo" retainaspect="1"/>
 		<image name="splashteamwin" filename="splashteamwin" retainaspect="1"/>
+		<image name="mimi" filename="mimi" retainaspect="1"/>
 	</resources>
 
 	<variables>
@@ -34,6 +36,17 @@
 				<image resource="splashlogo"/>
 				<placement x="540" y="456" placement="4"/>
 			</image>
+
+			<image>
+				<image resource="mimi"/>
+				<placement x="540" y="1020" placement="4"/>
+			</image>
+
+			<text color="%header_color%">
+				<font resource="font_c"/>
+				<placement x="540" y="1345" placement="5"/>
+				<text>小米奇迹</text>
+			</text>
 
 			<image>
 				<image resource="splashteamwin"/>
