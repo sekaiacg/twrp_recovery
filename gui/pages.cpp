@@ -1523,7 +1523,7 @@ int PageManager::RunReload() {
 		}
 	}
 	if (ret_val == 0) {
-		if (DataManager::GetStrValue("tw_language") != "en.xml") {
+		if (DataManager::GetStrValue("tw_language") != "en") {
 			LOGINFO("Loading language '%s'\n", DataManager::GetStrValue("tw_language").c_str());
 			LoadLanguage(DataManager::GetStrValue("tw_language"));
 		}
