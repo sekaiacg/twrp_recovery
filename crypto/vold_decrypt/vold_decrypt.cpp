@@ -780,6 +780,7 @@ void Set_Needed_Properties(void) {
 	property_set("vendor.sys.listeners.registered", "false");
 }
 
+#ifdef TW_INCLUDE_LIBRESETPROP // Patch_Level_Overrides
 void Update_Patch_Level(void) {
 	// On Oreo and above, keymaster requires Android version & patch level to match installed system
 	string sdkverstr = TWFunc::System_Property_Get("ro.build.version.sdk");
@@ -901,6 +902,7 @@ void Revert_Patch_Level(void) {
 		return;
 	}
 }
+#endif // Patch_Level_Overrides
 
 static unsigned int get_blkdev_size(int fd) {
 	unsigned long nr_sec;
