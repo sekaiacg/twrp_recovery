@@ -140,6 +140,7 @@ enum TW_FSTAB_FLAGS {
 	TWFLAG_IGNOREBLKID,
 	TWFLAG_LENGTH,
 	TWFLAG_MOUNTTODECRYPT,
+	TWFLAG_QUOTA,
 	TWFLAG_REMOVABLE,
 	TWFLAG_SETTINGSSTORAGE,
 	TWFLAG_STORAGE,
@@ -188,6 +189,7 @@ const struct flag_list tw_flags[] = {
 	{ "ignoreblkid",            TWFLAG_IGNOREBLKID },
 	{ "length=",                TWFLAG_LENGTH },
 	{ "mounttodecrypt",         TWFLAG_MOUNTTODECRYPT },
+	{ "quota",                  TWFLAG_QUOTA },
 	{ "removable",              TWFLAG_REMOVABLE },
 	{ "settingsstorage",        TWFLAG_SETTINGSSTORAGE },
 	{ "storage",                TWFLAG_STORAGE },
@@ -975,6 +977,9 @@ void TWPartition::Apply_TW_Flag(const unsigned flag, const char* str, const bool
 			break;
 		case TWFLAG_MOUNTTODECRYPT:
 			Mount_To_Decrypt = val;
+			break;
+		case TWFLAG_QUOTA:
+			// Filesystem flag - TWRP does not need to process
 			break;
 		case TWFLAG_REMOVABLE:
 			Removable = val;
