@@ -1708,7 +1708,18 @@ int TWPartitionManager::Format_Data(void) {
 			if (!Check_Pending_Merges())
 				return false;
 		}
+#ifdef TW_FIX_XIAOMI_FORMATDATA_CAUSED_VIBRATION
+		char vib_state[PROPERTY_VALUE_MAX];
+		property_get("init.svc.vibratorfeature-hal-service", vib_state, "");
+		bool vib_flag = strcmp(vib_state, "running") == 0;
+		if (vib_flag) TWFunc::Exec_Cmd("stop vibratorfeature-hal-service", false);
+		usleep(500000);
+		bool ret = dat->Wipe_Encryption();
+		if (vib_flag) TWFunc::Exec_Cmd("start vibratorfeature-hal-service", false);
+		return ret;
+#else
 		return dat->Wipe_Encryption();
+#endif
 	} else {
 		gui_msg(Msg(msg::kError, "unable_to_locate=Unable to locate {1}.")("/data"));
 		return false;
