@@ -612,6 +612,7 @@ void TWFunc::Update_Log_File(void) {
 			}
 		}
 	}
+	if (TWFunc::File_Exists("/data/cache/command")) remove("/data/cache/command");
 	sync();
 }
 
