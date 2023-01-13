@@ -766,7 +766,8 @@ void TWPartition::Set_FBE_Status() {
 	DataManager::SetValue(TW_IS_DECRYPTED, 1);
 	Is_Encrypted = true;
 	Is_Decrypted = true;
-	if (Key_Directory.empty()) {
+	PartitionManager.Mount_By_Path("/metadata", false);
+	if (Key_Directory.empty() || !TWFunc::File_Exists(Key_Directory + "/key/encrypted_key")) {
 		Is_FBE = false;
 		DataManager::SetValue(TW_IS_FBE, 0);
 	} else {
