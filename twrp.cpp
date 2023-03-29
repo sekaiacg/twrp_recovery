@@ -112,11 +112,9 @@ static void Decrypt_Page(bool SkipDecryption, bool datamedia) {
 static void process_fastbootd_mode() {
 		LOGINFO("starting fastboot\n");
 
-#ifdef TW_LOAD_VENDOR_MODULES
-		if (android::base::GetBoolProperty("ro.virtual_ab.enabled", false)) {
+		if (android::base::GetBoolProperty("ro.boot.dynamic_partitions", false)) {
 			PartitionManager.Unmap_Super_Devices();
 		}
-#endif
 
 		gui_msg(Msg("fastboot_console_msg=Entered Fastboot mode..."));
 		// Check for and run startup script if script exists
@@ -405,11 +403,16 @@ int main(int argc, char **argv) {
 
 #ifdef TW_LOAD_VENDOR_MODULES
 	if (startup.Get_Fastboot_Mode()) {
-		TWPartition* ven_dlkm = PartitionManager.Find_Partition_By_Path("/vendor_dlkm");
 		android::base::SetProperty("ro.twrp.fastbootd", "1");
-		PartitionManager.Prepare_Super_Volume(PartitionManager.Find_Partition_By_Path("/vendor"));
-		if(ven_dlkm) {
-			PartitionManager.Prepare_Super_Volume(ven_dlkm);
+		std::vector<std::string> prepareParts = {
+			"/system_root",
+			"/vendor",
+			"/vendor_dlkm",
+			"/odm"
+		};
+		for (auto& preparePart : prepareParts) {
+			TWPartition *part = PartitionManager.Find_Partition_By_Path(preparePart);
+			if (part) PartitionManager.Prepare_Super_Volume(part);
 		}
 	}
 	KernelModuleLoader::Load_Vendor_Modules();
