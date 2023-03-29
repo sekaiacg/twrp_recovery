@@ -400,10 +400,15 @@ int main(int argc, char **argv) {
 
 #ifdef TW_LOAD_VENDOR_MODULES
 	if (startup.Get_Fastboot_Mode()) {
-		TWPartition* ven_dlkm = PartitionManager.Find_Partition_By_Path("/vendor_dlkm");
-		PartitionManager.Prepare_Super_Volume(PartitionManager.Find_Partition_By_Path("/vendor"));
-		if(ven_dlkm) {
-			PartitionManager.Prepare_Super_Volume(ven_dlkm);
+		std::vector<std::string> prepareParts = {
+			"/system_root",
+			"/vendor",
+			"/vendor_dlkm",
+			"/odm"
+		};
+		for (auto& preparePart : prepareParts) {
+			TWPartition *part = PartitionManager.Find_Partition_By_Path(preparePart);
+			if (part) PartitionManager.Prepare_Super_Volume(part);
 		}
 	}
 #endif
