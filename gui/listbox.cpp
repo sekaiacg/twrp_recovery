@@ -222,7 +222,7 @@ int GUIListBox::NotifyVarChange(const std::string& varName, const std::string& v
 				mUpdate = 1;
 			}
 		}
-		else if (varName == mVariable) {
+		else if (!mVariable.empty() && varName == mVariable) {
 			if (item.variableValue == currentValue) {
 				item.selected = 1;
 				SetVisibleListLocation(mVisibleItems.empty() ? 0 : mVisibleItems.size()-1);
