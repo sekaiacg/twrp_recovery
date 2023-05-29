@@ -606,13 +606,6 @@ void DataManager::SetDefaultValues()
 	mConst.SetValue(TW_ALLOW_PARTITION_SDCARD, "1");
 #endif
 
-#ifdef TW_INCLUDE_DUMLOCK
-	printf("TW_INCLUDE_DUMLOCK := true\n");
-	mConst.SetValue(TW_SHOW_DUMLOCK, "1");
-#else
-	mConst.SetValue(TW_SHOW_DUMLOCK, "0");
-#endif
-
 	mData.SetValue(TW_RECOVERY_FOLDER_VAR, TW_DEFAULT_RECOVERY_FOLDER);
 
 	str = GetCurrentStoragePath();

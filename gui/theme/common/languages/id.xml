@@ -397,7 +397,6 @@
 		<string name="language_hdr">Bahasa</string>
 		<string name="terminal_btn">Terminal</string>
 		<string name="reload_theme_btn">Reset Tema</string>
-		<string name="dumlock_btn">HTC Dumlock</string>
 		<string name="inject_twrp_btn">Suntik TWRP</string>
 		<string name="inject_twrp_confirm">Suntik ulang TWRP?</string>
 		<string name="injecting_twrp">Menyuntik ulang TWRP...</string>
@@ -417,19 +416,6 @@
 		<string name="partitioning_sd">Mempartisi kartu SD...</string>
 		<string name="partitioning_sd2">Ini membutuhkan waktu beberapa menit.</string>
 		<string name="part_sd_complete">Mempartisi selesai.</string>
-		<string name="dumlock_hdr">HTC Dumlock</string>
-		<string name="dumlock_restore_btn">Pulihkan boot original</string>
-		<string name="dumlock_restore_confirm">Pulihkan image boot original?</string>
-		<string name="dumlock_restoring">Memulihkan boot original...</string>
-		<string name="dumlock_restore_complete">Memulihkan boot original selesai</string>
-		<string name="dumlock_reflash_btn">Flash ulang recovery</string>
-		<string name="dumlock_reflash_confirm">Flash ulang recovery ke boot?</string>
-		<string name="dumlock_reflashing">Memflash recovery ke boot...</string>
-		<string name="dumlock_reflash_complete">Flash recovery ke boot selesai.</string>
-		<string name="dumlock_install_btn">Instal HTC Dumlock</string>
-		<string name="dumlock_install_confirm">Instal file HTC dumlock ke ROM?</string>
-		<string name="dumlock_installing">Menginstal HTC Dumlock...</string>
-		<string name="dumlock_install_complete">Instal HTC Dumlock selesai.</string>
 		<string name="swipe_to_unlock">Geser untuk Membuka</string>
 		<string name="swipe_unlock">   Buka</string>
 		<string name="fm_hdr">File Manager</string>
@@ -691,9 +677,6 @@
 		<string name="digest_match" version="2">Digest cocok</string>
 		<string name="pid_signal">{1} proses diakhiri dengan sinyal: {2}</string>
 		<string name="pid_error">{1} proses diakhiri dengan kesalahan: {2}</string>
-		<string name="install_dumlock">Menginstal HTC Dumlock ke sistem...</string>
-		<string name="dumlock_restore">Memulihkan boot original...</string>
-		<string name="dumlock_reflash">Memlash ulang recovery ke boot...</string>
 		<string name="run_script">Menjalankan skripsi {1}...</string>
 		<string name="rename_stock">Ubah nama file stok recovery dalam /sistem untuk mencegah stok ROM mengubah TWRP.</string>
 		<string name="split_backup">Memecah file cadangan menjadi beberapa arsip ...</string>
