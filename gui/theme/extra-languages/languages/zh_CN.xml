@@ -21,7 +21,7 @@
 		<string name="data">Data</string>
 		<string name="data_backup">Data（不包含存储）</string>
 		<string name="sdcard">SDCard</string>
-		<string name="internal">内置存储</string>
+		<string name="internal">内部存储设备</string>
 		<string name="microsd">SD 卡</string>
 		<string name="usbotg">外置 U 盘</string>
 		<string name="android_secure">Android Secure</string>
@@ -35,7 +35,7 @@
 		<!-- GUI XML strings -->
 		<string name="twrp_header">Team Win Recovery Project</string>
 		<string name="twrp_watch_header">TWRP %tw_version%</string>
-		<string name="cpu_temp">CPU温度: %tw_cpu_temp% &#xB0;C</string>
+		<string name="cpu_temp">CPU: %tw_cpu_temp% &#xB0;C</string>
 		<string name="battery_pct">电量: %tw_battery%</string>
 		<string name="sort_by_name">按名称排序</string>
 		<string name="sort_by_date">按日期排序</string>
