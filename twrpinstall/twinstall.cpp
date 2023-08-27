@@ -370,5 +370,8 @@ int TWinstall_zip(const char* path, int* wipe_cache, bool check_for_digest) {
 	} else {
 		LOGINFO("Install took %i second(s).\n", total_time);
 	}
+
+	if (ret_val == INSTALL_SUCCESS) gui_msg(Msg(msg::kHighlight, "install_took_seconds_msg=Install took {1} second(s).")(total_time));
+
 	return ret_val;
 }
