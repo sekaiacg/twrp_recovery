@@ -773,5 +773,7 @@
 		<string name="restore_with_pattern1">ROM 中的 图案密码 已启用</string>
 		<string name="restore_with_pattern2">恢复前应该在 ROM 中禁用 图案密码</string>
 		<string name="reboot_after_restore">建议在 Android 首次启动后再重启一次。</string>
+
+		<string name="install_took_seconds_msg">安装耗时 {1} 秒。</string>
 	</resources>
 </language>
