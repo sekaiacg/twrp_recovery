@@ -426,6 +426,16 @@ bool TWFunc::Wait_For_File(const string& path, std::chrono::nanoseconds timeout)
 	return false;
 }
 
+bool TWFunc::File_Exists(const string& path)
+{
+	struct stat st;
+
+	if (stat(path.c_str(), &st) == 0) {
+		return !S_ISDIR(st.st_mode);
+	}
+	return false;
+}
+
 #ifndef BUILD_TWRPTAR_MAIN
 
 // Returns "/path" from a full /path/to/file.name
