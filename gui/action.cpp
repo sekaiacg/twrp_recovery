@@ -1053,11 +1053,11 @@ void GUIAction::reinject_after_flash()
 int GUIAction::ozip_decrypt(string zip_path)
 {
 	if (!TWFunc::Path_Exists("/system/bin/ozip_decrypt")) {
-            return 1;
-        }
-    gui_msg("ozip_decrypt_decryption=Starting Ozip Decryption...");
+		return 1;
+	}
+	gui_msg("ozip_decrypt_decryption=Starting Ozip Decryption...");
 	TWFunc::Exec_Cmd("ozip_decrypt " + (string)TW_OZIP_DECRYPT_KEY + " '" + zip_path + "'");
-    gui_msg("ozip_decrypt_finish=Ozip Decryption Finished!");
+	gui_msg("ozip_decrypt_finish=Ozip Decryption Finished!");
 	return 0;
 }
 
@@ -1075,7 +1075,7 @@ int GUIAction::flash(std::string arg)
 		{
 			if((ozip_decrypt(zip_path)) != 0)
 			{
-		LOGERR("Unable to find ozip_decrypt!");
+				LOGERR("Unable to find ozip_decrypt!");
 				break;
 			}
 			zip_filename = (zip_filename.substr(0, zip_filename.size() - 4)).append("zip");
