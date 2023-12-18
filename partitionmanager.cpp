@@ -284,7 +284,12 @@ exit:
 }
 
 bool TWPartitionManager::Disable_AVB2(bool Display_Info) {
-	char disable_flags = AVB_VBMETA_IMAGE_FLAGS_VERIFICATION_DISABLED;
+#ifndef TW_AVB_VBMETA_FLAGS_ALL_DISABLED
+	char disable_flags = AVB_VBMETA_IMAGE_FLAGS_HASHTREE_DISABLED;
+#else
+	char disable_flags = AVB_VBMETA_IMAGE_FLAGS_HASHTREE_DISABLED |
+		AVB_VBMETA_IMAGE_FLAGS_VERIFICATION_DISABLED;
+#endif
 
 #ifdef AB_OTA_UPDATER
 	return Do_Disable_AVB2("vbmeta_a", disable_flags, Display_Info)
