@@ -108,6 +108,10 @@ exit:
 	if (ven_dlkm)
 		ven_dlkm->UnMount(false, MNT_DETACH);
 
+#ifdef TW_XIAOMI_TOUCH_PERMISSION_FIX
+	TWFunc::Exec_Cmd("chmod 0664 /sys/class/touch/touch_dev/touch_thp* > /dev/null 2>&1", false);
+#endif
+
 	android::base::SetProperty(TW_MODULES_MOUNTED_PROP, "true");
 
 	return true;
