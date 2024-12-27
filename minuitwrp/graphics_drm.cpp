@@ -832,6 +832,26 @@ static drmModeConnector *find_first_connected_connector(int fd,
     return nullptr;
 }
 
+static void printDisplayModeInfo(const drmModeConnector *monitor_connector) {
+    for (int modes = 0; modes < monitor_connector->count_modes; modes++) {
+		auto mode = monitor_connector->modes[modes];
+        printf("ui: Display Mode #%d resolution: %dx%d@%d type: %d\n", modes,
+            mode.hdisplay,
+            mode.vdisplay,
+            mode.vrefresh,
+            mode.type);
+    }
+}
+
+static int getModeIdxByFramerate(const drmModeConnector *monitor_connector,
+        uint32_t framerate) {
+    for (int modes = 0; modes < monitor_connector->count_modes; modes++) {
+        if (monitor_connector->modes[modes].vrefresh == framerate)
+            return modes;
+    }
+	return -1;
+}
+
 static drmModeConnector *find_main_monitor(int fd, drmModeRes *resources,
         uint32_t *mode_index) {
     /* Look for LVDS/eDP/DSI connectors. Those are the main screens. */
@@ -867,6 +887,12 @@ static drmModeConnector *find_main_monitor(int fd, drmModeRes *resources,
             break;
         }
     }
+
+    printDisplayModeInfo(main_monitor_connector);
+	int tw_framerate_mode_idx = getModeIdxByFramerate(main_monitor_connector, TW_FRAMERATE);
+	if (tw_framerate_mode_idx >= 0) *mode_index = tw_framerate_mode_idx;
+	printf("ui: Current TW_FRAMERATE is @%d\n", TW_FRAMERATE);
+	printf("ui: Choosing display mode #%d\n", *mode_index);
 
     return main_monitor_connector;
 }

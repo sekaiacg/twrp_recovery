@@ -97,6 +97,9 @@ func globalSrcs(ctx android.BaseContext) []string {
 	if getMakeVars(ctx, "TW_HAPTICS_TSPDRV") == "true" {
 		srcs = append(srcs, "tspdrv.cpp")
 	}
+	if getMakeVars(ctx, "TW_FRAMERATE") != "" {
+		srcs = append(srcs, "-DTW_FRAMERATE="+getMakeVars(ctx, "TW_FRAMERATE"))
+	}
 	return srcs
 }
 
